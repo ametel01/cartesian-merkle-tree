@@ -55,6 +55,52 @@ CMTs are particularly well-suited for blockchain applications:
 - **Deterministic behavior**: Essential for consensus across nodes
 - **State management**: Efficient for rollups and layer-2 solutions
 
+## Use Cases
+
+CMTs are ideal for various onchain applications requiring dynamic, verifiable data structures:
+
+### DeFi & Financial Applications
+
+- **Liquidity Pool Management**: Track liquidity positions with cryptographic proofs
+- **Staking Registries**: Manage staking positions with add/remove capabilities
+- **Order Book Systems**: Maintain sorted order books with proof of inclusion
+- **Lending Protocol Collateral**: Track collateral deposits with verification
+
+### Identity & Access Control
+
+- **Decentralized Identity (DID)**: Store verifiable credentials entirely onchain
+- **Allowlist/Whitelist Management**: Dynamic access control with membership proofs
+- **KYC/AML Registries**: Maintain compliance lists with cryptographic verification
+- **DAO Membership**: Track voting rights and member privileges
+
+### Gaming & NFTs
+
+- **Asset Ownership Registries**: Efficient tracking of in-game items or NFTs
+- **Achievement Systems**: Verifiable player accomplishments
+- **Tournament Brackets**: Maintain competitive rankings with proof of position
+- **Loot Distribution**: Fair and verifiable reward allocation
+
+### Infrastructure & Scaling
+
+- **Layer 2 State Management**: Efficient state roots for rollups
+- **Cross-chain Bridge State**: Track locked assets with proofs
+- **Oracle Data Aggregation**: Verifiable data feeds with update history
+- **State Channel Checkpoints**: Efficient intermediate state commitments
+
+### Governance & Voting
+
+- **Voter Registries**: Dynamic voter lists with add/remove capabilities
+- **Proposal Tracking**: Maintain proposal states with verification
+- **Delegation Systems**: Track delegated voting power with proofs
+- **Quadratic Funding**: Verifiable contribution tracking
+
+### Supply Chain & Real World Assets
+
+- **Product Authenticity**: Track genuine products with proof of origin
+- **Inventory Management**: Verifiable stock levels across locations
+- **Certification Tracking**: Maintain certification status with proofs
+- **Carbon Credit Registry**: Track and verify environmental credits
+
 ## Installation
 
 Add to your `Scarb.toml`:
@@ -116,11 +162,9 @@ assert!(non_existence_proof.verify(root_hash, 40));
 ### Using as Starknet Contract Component
 
 ```cairo
-use cartesian_merkle_tree::components::cmtree_component;
-
 #[starknet::contract]
 mod MyContract {
-    use super::cmtree_component::cmtree_component;
+    use cartesian_merkle_tree::cmtree_component::cmtree_component;
 
     component!(path: cmtree_component, storage: cmtree, event: CMTreeEvent);
 
