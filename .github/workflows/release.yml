@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.2.0)'
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Scarb
+      uses: software-mansion/setup-scarb@v1
+      with:
+        scarb-version: 2.12.0
+    
+    - name: Verify version
+      run: |
+        TOML_VERSION=$(grep "^version" Scarb.toml | cut -d'"' -f2)
+        TAG_VERSION=${GITHUB_REF#refs/tags/v}
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          if [ "$TOML_VERSION" != "$TAG_VERSION" ]; then
+            echo "Version mismatch: Scarb.toml has $TOML_VERSION but tag is $TAG_VERSION"
+            exit 1
+          fi
+        fi
+        echo "Version: $TOML_VERSION"
+    
+    - name: Build package
+      run: scarb build
+    
+    - name: Run tests
+      run: |
+        # Install snforge for testing
+        curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh
+        snfoundryup -v 0.48.1
+        snforge test
+    
+    - name: Package for publication
+      run: scarb package
+    
+    - name: Publish to registry
+      env:
+        SCARB_REGISTRY_AUTH_TOKEN: ${{ secrets.SCARB_REGISTRY_AUTH_TOKEN }}
+      run: |
+        if [ -n "$SCARB_REGISTRY_AUTH_TOKEN" ]; then
+          scarb publish
+          echo "✅ Package published successfully"
+        else
+          echo "⚠️ No auth token found, skipping publication"
+          echo "To enable automatic publishing, add SCARB_REGISTRY_AUTH_TOKEN to repository secrets"
+        fi
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: target/package/*.tar.zst
+        generate_release_notes: true
+        body: |
+          ## Installation
+          
+          Add to your `Scarb.toml`:
+          ```toml
+          [dependencies]
+          cartesian_merkle_tree = "${{ github.ref_name }}"
+          ```
+          
+          ## Documentation
+          
+          📚 [View documentation](https://ametel01.github.io/cartesian-merkle-tree/)
+          
+          ## What's Changed
+          
+          See the full changelog below.

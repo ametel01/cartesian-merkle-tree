@@ -1,0 +1,73 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'Scarb.toml'
+      - 'README.md'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout main branch
+      uses: actions/checkout@v4
+      with:
+        ref: main
+    
+    - name: Setup Scarb
+      uses: software-mansion/setup-scarb@v1
+      with:
+        scarb-version: 2.12.0
+    
+    - name: Build documentation
+      run: |
+        scarb doc --build
+        echo "Documentation built successfully"
+    
+    - name: Prepare documentation files
+      run: |
+        mkdir -p deploy-docs
+        cp -r target/doc/cartesian_merkle_tree/book/* deploy-docs/
+        touch deploy-docs/.nojekyll
+        echo "Documentation files prepared"
+    
+    - name: Checkout gh-pages branch
+      uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+        path: gh-pages
+    
+    - name: Update gh-pages branch
+      run: |
+        # Remove old docs
+        rm -rf gh-pages/*
+        # Copy new docs
+        cp -r deploy-docs/* gh-pages/
+        cd gh-pages
+        # Configure git
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        # Commit and push if there are changes
+        if [ -n "$(git status --porcelain)" ]; then
+          git add -A
+          git commit -m "Update documentation - $(date '+%Y-%m-%d %H:%M:%S')"
+          git push origin gh-pages
+          echo "Documentation updated and pushed to gh-pages"
+        else
+          echo "No documentation changes to deploy"
+        fi
+    
+    - name: Output deployment URL
+      run: |
+        echo "📚 Documentation deployed to: https://ametel01.github.io/cartesian-merkle-tree/"
+        echo "::notice title=Documentation URL::https://ametel01.github.io/cartesian-merkle-tree/"

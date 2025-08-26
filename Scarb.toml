@@ -1,10 +1,10 @@
 [package]
 name = "cartesian_merkle_tree"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024_07"
 authors = ["Alex Metelli <alex-metelli@gmx.com>"]
 description = "Cairo implementation of Cartesian Merkle Trees - efficient cryptographic data structure combining BST, heap, and Merkle tree properties"
-documentation = "https://github.com/ametel01/cartesian-merkle-tree"
+documentation = "https://ametel01.github.io/cartesian-merkle-tree/"
 readme = "README.md"
 homepage = "https://github.com/ametel01/cartesian-merkle-tree"
 repository = "https://github.com/ametel01/cartesian-merkle-tree"

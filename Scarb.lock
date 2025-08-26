@@ -3,7 +3,7 @@ version = 1
 
 [[package]]
 name = "cartesian_merkle_tree"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "snforge_std",
 ]
