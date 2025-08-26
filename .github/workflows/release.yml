@@ -11,8 +11,38 @@ on:
         required: true
 
 jobs:
+  # First run CI checks
+  ci-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Scarb
+      uses: software-mansion/setup-scarb@v1
+      with:
+        scarb-version: 2.12.0
+    
+    - name: Setup Starknet Foundry
+      uses: foundry-rs/setup-snfoundry@v3
+      with:
+        starknet-foundry-version: 0.48.1
+    
+    - name: Build
+      run: scarb build
+    
+    - name: Format check
+      run: scarb fmt --check
+    
+    - name: Run tests
+      run: snforge test
+    
+    - name: Lint
+      run: scarb lint
+      continue-on-error: true
+
   publish:
     runs-on: ubuntu-latest
+    needs: ci-check
     steps:
     - uses: actions/checkout@v4
     
@@ -36,12 +66,7 @@ jobs:
     - name: Build package
       run: scarb build
     
-    - name: Run tests
-      run: |
-        # Install snforge for testing
-        curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh
-        snfoundryup -v 0.48.1
-        snforge test
+    # Tests already ran in ci-check job
     
     - name: Package for publication
       run: scarb package
