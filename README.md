@@ -55,12 +55,21 @@ CMTs are particularly well-suited for blockchain applications:
 - **Deterministic behavior**: Essential for consensus across nodes
 - **State management**: Efficient for rollups and layer-2 solutions
 
+## Installation
+
+Add to your `Scarb.toml`:
+
+```toml
+[dependencies]
+cartesian_merkle_tree = { git = "https://github.com/ametel01/cartesian-merkle-tree.git" }
+```
+
 ## Usage
 
-### Basic Operations
+### In-Memory Tree Operations
 
 ```cairo
-use cartesian_merkle_tree::tree::CMTreeTrait;
+use cartesian_merkle_tree::{CMTree, CMTreeTrait};
 
 // Create a new tree
 let mut tree = CMTreeTrait::new();
@@ -85,7 +94,7 @@ let root_hash = tree.get_root_hash();
 ### Proof Generation and Verification
 
 ```cairo
-use cartesian_merkle_tree::{tree::CMTreeTrait, proof::CMTreeProofTrait};
+use cartesian_merkle_tree::{CMTree, CMTreeTrait, CMTreeProofTrait};
 
 let mut tree = CMTreeTrait::new();
 tree.insert(50);
@@ -93,15 +102,81 @@ tree.insert(30);
 tree.insert(70);
 
 // Generate existence proof
-let proof = tree.generate_proof_with_path(30);
+let proof = tree.generate_proof(30);
 let root_hash = tree.get_root_hash();
 
 // Verify the proof
 assert!(proof.verify(root_hash, 30));
 
 // Generate non-existence proof
-let non_existence_proof = tree.generate_proof_with_path(40);
+let non_existence_proof = tree.generate_proof(40);
 assert!(non_existence_proof.verify(root_hash, 40));
+```
+
+### Using as Starknet Contract Component
+
+```cairo
+use cartesian_merkle_tree::components::cmtree_component;
+
+#[starknet::contract]
+mod MyContract {
+    use super::cmtree_component::cmtree_component;
+
+    component!(path: cmtree_component, storage: cmtree, event: CMTreeEvent);
+
+    // Embed the CMTree component's external functions
+    #[abi(embed_v0)]
+    impl CMTreeImpl = cmtree_component::CMTree<ContractState>;
+
+    // Access to internal functions
+    impl CMTreeInternalImpl = cmtree_component::InternalFunctions<ContractState>;
+
+    #[storage]
+    struct Storage {
+        #[substorage(v0)]
+        cmtree: cmtree_component::Storage,
+    }
+
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    enum Event {
+        CMTreeEvent: cmtree_component::Event,
+    }
+
+    #[constructor]
+    fn constructor(ref self: ContractState) {
+        // Initialize the CMTree component
+        self.cmtree.initializer();
+    }
+}
+```
+
+### Contract Usage Example
+
+```cairo
+use cartesian_merkle_tree::components::cmtree_component::{
+    ICMTreeDispatcher, ICMTreeDispatcherTrait
+};
+
+fn use_cmt_contract(contract_address: ContractAddress) {
+    let dispatcher = ICMTreeDispatcher { contract_address };
+
+    // Insert elements
+    dispatcher.insert(50);
+    dispatcher.insert(30);
+    dispatcher.insert(70);
+
+    // Search for elements
+    assert!(dispatcher.search(50));
+
+    // Generate and verify proofs
+    let proof = dispatcher.generate_proof(30);
+    let root_hash = dispatcher.get_root_hash();
+    assert!(dispatcher.verify_proof(proof, root_hash, 30));
+
+    // Remove elements
+    assert!(dispatcher.remove(30));
+}
 ```
 
 ## Implementation Details
