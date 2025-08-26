@@ -47,6 +47,7 @@
 
 // Core library modules
 pub mod library {
+    pub mod node;
     pub mod proof;
     pub mod tree;
     pub mod utils;
@@ -59,8 +60,9 @@ pub mod components {
     #[cfg(test)]
     pub mod contract_example;
 }
-pub use library::proof::{CMTProof, CMTProofTrait, CMTreeProofTrait, ProofNode};
-pub use library::tree::{CMTree, CMTreeTrait};
 
 // Re-export main types and traits for easy access
-pub use library::utils::{CMTNode, CMTNodeTrait, CMTUtilsTrait};
+pub use library::node::{CMTNode, CMTNodeTrait};
+pub use library::proof::{CMTProof, CMTProofTrait, CMTreeProofTrait, ProofNode};
+pub use library::tree::{CMTree, CMTreeTrait};
+pub use library::utils::CMTUtilsTrait;
