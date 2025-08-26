@@ -62,6 +62,7 @@ jobs:
           fi
         fi
         echo "Version: $TOML_VERSION"
+        echo "TAG_VERSION=$TAG_VERSION" >> $GITHUB_ENV
     
     - name: Build package
       run: scarb build
@@ -95,7 +96,7 @@ jobs:
           Add to your `Scarb.toml`:
           ```toml
           [dependencies]
-          cartesian_merkle_tree = "${{ github.ref_name }}"
+          cartesian_merkle_tree = "${{ env.TAG_VERSION }}"
           ```
           
           ## Documentation
