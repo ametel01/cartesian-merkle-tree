@@ -1,1 +1,147 @@
-# cartesian_merkle_tree
+# Cartesian Merkle Tree
+
+A Cairo library implementation of Cartesian Merkle Trees (CMTs) - an efficient data structure combining binary search tree properties with heap properties and Merkle tree cryptographic verification capabilities.
+
+## Overview
+
+Cartesian Merkle Trees represent a significant advancement over traditional Merkle tree structures by storing useful data in every node rather than just leaves. This implementation provides:
+
+- **O(log n) operations** for insertions, deletions, and searches
+- **Deterministic tree structure** through key-derived priorities
+- **Cryptographic proof generation** for membership and non-membership verification
+- **Self-balancing properties** through treap rotations
+- **Space-efficient design** with useful data stored in all nodes
+
+## What are Cartesian Merkle Trees?
+
+CMTs combine three fundamental data structures:
+
+1. **Binary Search Tree (BST)**: Keys are ordered for efficient search operations
+2. **Heap**: Priorities maintain balance through the treap property
+3. **Merkle Tree**: Each node contains a cryptographic hash for verification
+
+Each element in the tree corresponds to a point on a 2D plane:
+
+- **X-coordinate**: The key (determines BST position)
+- **Y-coordinate**: The priority (determines heap structure, derived deterministically from the key)
+
+This dual ordering ensures both efficient operations and cryptographic integrity.
+
+## Why CMTs vs Existing Solutions?
+
+### Advantages over Sparse Merkle Trees (SMT):
+
+- **Useful data in all nodes**: SMTs only store data in leaves, CMTs utilize every node
+- **Better memory efficiency**: Reduced storage requirements while maintaining functionality
+- **Flexible tree depth**: Not constrained by fixed depth requirements
+
+### Advantages over Incremental Merkle Trees (IMT):
+
+- **No off-chain dependency**: Generate proofs entirely on-chain
+- **Support for deletions**: Full CRUD operations vs append-only IMTs
+- **Deterministic structure**: Same set of elements always produces the same tree
+
+### Trade-offs:
+
+- **Proof size**: At worst 2x larger than SMT proofs, but often smaller in practice
+- **Implementation complexity**: More sophisticated than basic Merkle trees
+
+## On-Chain Benefits
+
+CMTs are particularly well-suited for blockchain applications:
+
+- **Gas efficiency**: Fewer storage operations due to useful data in all nodes
+- **Proof verification**: Compact proofs for state transitions
+- **Deterministic behavior**: Essential for consensus across nodes
+- **State management**: Efficient for rollups and layer-2 solutions
+
+## Usage
+
+### Basic Operations
+
+```cairo
+use cartesian_merkle_tree::tree::CMTreeTrait;
+
+// Create a new tree
+let mut tree = CMTreeTrait::new();
+
+// Insert elements
+tree.insert(50);
+tree.insert(30);
+tree.insert(70);
+
+// Search for elements
+assert!(tree.search(50));
+assert!(!tree.search(100));
+
+// Remove elements
+assert!(tree.remove(30));
+assert!(!tree.search(30));
+
+// Get root hash for verification
+let root_hash = tree.get_root_hash();
+```
+
+### Proof Generation and Verification
+
+```cairo
+use cartesian_merkle_tree::{tree::CMTreeTrait, proof::CMTreeProofTrait};
+
+let mut tree = CMTreeTrait::new();
+tree.insert(50);
+tree.insert(30);
+tree.insert(70);
+
+// Generate existence proof
+let proof = tree.generate_proof_with_path(30);
+let root_hash = tree.get_root_hash();
+
+// Verify the proof
+assert!(proof.verify(root_hash, 30));
+
+// Generate non-existence proof
+let non_existence_proof = tree.generate_proof_with_path(40);
+assert!(non_existence_proof.verify(root_hash, 40));
+```
+
+## Implementation Details
+
+This Cairo implementation features:
+
+- **Poseidon hashing** for priority calculation and Merkle commitments
+- **Deterministic priority generation** ensuring consistent tree structure
+- **Efficient rotations** for maintaining heap property
+- **Comprehensive proof system** supporting both membership and non-membership
+- **Memory-safe operations** using Cairo's ownership model
+
+## Research Foundation
+
+This implementation is based on the research paper ["Cartesian Merkle Trees"](https://arxiv.org/abs/2504.10944) which provides the theoretical foundation and formal analysis of the data structure.
+
+## Documentation
+
+For complete API documentation and implementation details, run:
+
+```bash
+scarb doc --build
+```
+
+## Testing
+
+Run the test suite with:
+
+```bash
+scarb test
+```
+
+The implementation includes comprehensive tests covering:
+
+- Basic tree operations (insert, search, remove)
+- Heap property maintenance through rotations
+- Merkle hash consistency
+- Proof generation and verification
+- Edge cases and error conditions
+
+## License
+
+This implementation follows the research outlined in the linked paper and provides a practical Cairo implementation for blockchain applications.
