@@ -43,8 +43,9 @@
 
 use core::array::ArrayTrait;
 use core::traits::DivRem;
+use super::node::CMTNode;
 use super::tree::{CMTree, CMTreeTrait};
-use super::utils::{CMTNode, CMTUtilsTrait};
+use super::utils::CMTUtilsTrait;
 
 /// A node in a Merkle proof path containing key and hash information.
 #[derive(Drop, Clone, Debug)]
