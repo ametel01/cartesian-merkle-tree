@@ -1,6 +1,6 @@
 [package]
 name = "cartesian_merkle_tree"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024_07"
 authors = ["Alex Metelli <alex-metelli@gmx.com>"]
 description = "Cairo implementation of Cartesian Merkle Trees - efficient cryptographic data structure combining BST, heap, and Merkle tree properties"
