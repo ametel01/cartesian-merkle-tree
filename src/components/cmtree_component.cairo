@@ -45,7 +45,7 @@ pub mod cmtree_component {
     use core::array::ArrayTrait;
     use core::hash::HashStateTrait;
     use core::poseidon::PoseidonTrait;
-    use core::traits::Into;
+    use core::traits::{DivRem, Into};
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
@@ -193,17 +193,14 @@ pub mod cmtree_component {
             let mut i = 2;
             let mut direction_bits = proof.direction_bits;
 
-            loop {
-                if i >= proof.siblings_length {
-                    break;
-                }
-
+            while i < proof.siblings_length {
                 let node_key = *proof.siblings.at(i);
                 let sibling_hash = *proof.siblings.at(i + 1);
 
                 let direction_bits_u256: u256 = direction_bits.into();
-                let use_original_order = (direction_bits_u256 & 1) == 0;
-                direction_bits = (direction_bits_u256 / 2).try_into().unwrap();
+                let (new_direction_bits, remainder) = DivRem::div_rem(direction_bits_u256, 2);
+                let use_original_order = remainder == 0;
+                direction_bits = new_direction_bits.try_into().unwrap();
 
                 current_hash =
                     if use_original_order {
@@ -310,20 +307,18 @@ pub mod cmtree_component {
                     self.update_node_hash(current_index);
                     self.restore_heap_property(current_index, true)
                 }
+            } else if current.right_child_index == 0 {
+                current.right_child_index = new_index;
+                self.write_node(current_index, current);
+                self.update_node_hash(current_index);
+                self.restore_heap_property(current_index, false)
             } else {
-                if current.right_child_index == 0 {
-                    current.right_child_index = new_index;
-                    self.write_node(current_index, current);
-                    self.update_node_hash(current_index);
-                    self.restore_heap_property(current_index, false)
-                } else {
-                    let new_right_index = self
-                        .insert_node(current.right_child_index, new_index, new_key, new_priority);
-                    current.right_child_index = new_right_index;
-                    self.write_node(current_index, current);
-                    self.update_node_hash(current_index);
-                    self.restore_heap_property(current_index, false)
-                }
+                let new_right_index = self
+                    .insert_node(current.right_child_index, new_index, new_key, new_priority);
+                current.right_child_index = new_right_index;
+                self.write_node(current_index, current);
+                self.update_node_hash(current_index);
+                self.restore_heap_property(current_index, false)
             }
         }
 
@@ -346,20 +341,18 @@ pub mod cmtree_component {
                 } else {
                     node_index
                 }
-            } else {
-                if node.right_child_index != 0 {
-                    let right_child = self.read_node(node.right_child_index);
-                    let right_priority_u256: u256 = right_child.priority.into();
-                    let node_priority_u256: u256 = node.priority.into();
+            } else if node.right_child_index != 0 {
+                let right_child = self.read_node(node.right_child_index);
+                let right_priority_u256: u256 = right_child.priority.into();
+                let node_priority_u256: u256 = node.priority.into();
 
-                    if right_priority_u256 > node_priority_u256 {
-                        self.left_rotate(node_index)
-                    } else {
-                        node_index
-                    }
+                if right_priority_u256 > node_priority_u256 {
+                    self.left_rotate(node_index)
                 } else {
                     node_index
                 }
+            } else {
+                node_index
             }
         }
 
@@ -601,39 +594,37 @@ pub mod cmtree_component {
                             );
                         (found, non_existence_key, true)
                     }
-                } else {
-                    if node.right_child_index == 0 {
-                        // Non-existence proof
-                        let left_hash = if node.left_child_index == 0 {
-                            0
-                        } else {
-                            self.read_node(node.left_child_index).merkle_hash
-                        };
-                        let right_hash = 0;
-
-                        siblings.append(left_hash);
-                        siblings.append(right_hash);
-                        siblings_count += 2;
-
-                        let left_u256: u256 = left_hash.into();
-                        let right_u256: u256 = right_hash.into();
-                        direction_bits =
-                            calculate_direction_bit(
-                                direction_bits, siblings_count, left_u256 > right_u256,
-                            );
-
-                        (false, node.key, false)
+                } else if node.right_child_index == 0 {
+                    // Non-existence proof
+                    let left_hash = if node.left_child_index == 0 {
+                        0
                     } else {
-                        let (found, non_existence_key) = self
-                            .generate_proof_internal(
-                                node.right_child_index,
-                                key,
-                                ref siblings,
-                                ref direction_bits,
-                                ref siblings_count,
-                            );
-                        (found, non_existence_key, false)
-                    }
+                        self.read_node(node.left_child_index).merkle_hash
+                    };
+                    let right_hash = 0;
+
+                    siblings.append(left_hash);
+                    siblings.append(right_hash);
+                    siblings_count += 2;
+
+                    let left_u256: u256 = left_hash.into();
+                    let right_u256: u256 = right_hash.into();
+                    direction_bits =
+                        calculate_direction_bit(
+                            direction_bits, siblings_count, left_u256 > right_u256,
+                        );
+
+                    (false, node.key, false)
+                } else {
+                    let (found, non_existence_key) = self
+                        .generate_proof_internal(
+                            node.right_child_index,
+                            key,
+                            ref siblings,
+                            ref direction_bits,
+                            ref siblings_count,
+                        );
+                    (found, non_existence_key, false)
                 };
 
                 // Add sibling info for path
@@ -646,12 +637,10 @@ pub mod cmtree_component {
                         } else {
                             self.read_node(node.right_child_index).merkle_hash
                         }
+                    } else if node.left_child_index == 0 {
+                        0
                     } else {
-                        if node.left_child_index == 0 {
-                            0
-                        } else {
-                            self.read_node(node.left_child_index).merkle_hash
-                        }
+                        self.read_node(node.left_child_index).merkle_hash
                     };
 
                     siblings.append(sibling_hash);
@@ -663,12 +652,10 @@ pub mod cmtree_component {
                         } else {
                             self.read_node(node.left_child_index).merkle_hash
                         }
+                    } else if node.right_child_index == 0 {
+                        0
                     } else {
-                        if node.right_child_index == 0 {
-                            0
-                        } else {
-                            self.read_node(node.right_child_index).merkle_hash
-                        }
+                        self.read_node(node.right_child_index).merkle_hash
                     };
 
                     let child_u256: u256 = child_hash.into();

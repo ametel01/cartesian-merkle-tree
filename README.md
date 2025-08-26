@@ -206,7 +206,7 @@ scarb doc --build
 Run the test suite with:
 
 ```bash
-scarb test
+snforge test
 ```
 
 The implementation includes comprehensive tests covering:

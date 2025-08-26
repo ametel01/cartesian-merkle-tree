@@ -42,6 +42,7 @@
 //! ```
 
 use core::array::ArrayTrait;
+use core::traits::DivRem;
 use super::tree::{CMTree, CMTreeTrait};
 use super::utils::{CMTNode, CMTUtilsTrait};
 
@@ -162,18 +163,15 @@ pub impl CMTProofImpl of CMTProofTrait {
         let mut i = 2;
         let mut direction_bits = *self.direction_bits;
 
-        loop {
-            if i >= *self.siblings_length {
-                break;
-            }
-
+        while i < *self.siblings_length {
             let node_key = *self.siblings.at(i);
             let sibling_hash = *self.siblings.at(i + 1);
 
             // Use direction bit to determine ordering
             let direction_bits_u256: u256 = direction_bits.into();
-            let use_original_order = (direction_bits_u256 & 1) == 0;
-            direction_bits = (direction_bits_u256 / 2).try_into().unwrap(); // Right shift
+            let (new_direction_bits, remainder) = DivRem::div_rem(direction_bits_u256, 2);
+            let use_original_order = remainder == 0;
+            direction_bits = new_direction_bits.try_into().unwrap();
 
             current_hash =
                 if use_original_order {
