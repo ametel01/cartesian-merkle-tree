@@ -155,9 +155,6 @@ pub impl CMTNodeImpl of CMTNodeTrait {
     }
 }
 
-/// Utility struct providing static helper functions for Cartesian Merkle Tree operations.
-pub struct CMTUtils {}
-
 #[generate_trait]
 pub impl CMTUtilsImpl of CMTUtilsTrait {
     /// Calculates a deterministic priority for a given key using Poseidon hashing.

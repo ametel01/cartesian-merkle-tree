@@ -47,7 +47,7 @@
 //! ```
 
 use core::traits::Into;
-use crate::utils::{CMTNode, CMTNodeTrait, CMTUtilsTrait};
+use super::utils::{CMTNode, CMTNodeTrait, CMTUtilsTrait};
 
 /// A Cartesian Merkle Tree combining binary search tree, heap, and Merkle tree properties.
 ///

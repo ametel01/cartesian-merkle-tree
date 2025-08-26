@@ -42,8 +42,8 @@
 //! ```
 
 use core::array::ArrayTrait;
-use crate::tree::{CMTree, CMTreeTrait};
-use crate::utils::{CMTNode, CMTUtilsTrait};
+use super::tree::{CMTree, CMTreeTrait};
+use super::utils::{CMTNode, CMTUtilsTrait};
 
 /// A node in a Merkle proof path containing key and hash information.
 #[derive(Drop, Clone, Debug)]
@@ -462,7 +462,7 @@ pub impl CMTreeProofImpl of CMTreeProofTrait {
 
 #[cfg(test)]
 mod tests {
-    use crate::tree::CMTreeTrait;
+    use crate::CMTreeTrait;
     use super::{CMTProofTrait, CMTreeProofTrait};
 
     #[test]
