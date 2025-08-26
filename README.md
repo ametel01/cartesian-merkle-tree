@@ -107,6 +107,13 @@ Add to your `Scarb.toml`:
 
 ```toml
 [dependencies]
+cartesian_merkle_tree = "0.1.0"
+```
+
+Or install from GitHub:
+
+```toml
+[dependencies]
 cartesian_merkle_tree = { git = "https://github.com/ametel01/cartesian-merkle-tree.git" }
 ```
 
