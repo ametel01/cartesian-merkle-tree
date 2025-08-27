@@ -21,7 +21,7 @@ jobs:
           scarb-version: ${{ env.SCARB_VERSION }}
 
       - name: Cache Scarb packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/scarb
           key: ${{ runner.os }}-scarb-${{ hashFiles('**/Scarb.lock') }}
@@ -71,7 +71,7 @@ jobs:
           starknet-foundry-version: 0.48.1
 
       - name: Cache Scarb packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/scarb
           key: ${{ runner.os }}-scarb-${{ hashFiles('**/Scarb.lock') }}
