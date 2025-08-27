@@ -107,7 +107,7 @@ Add to your `Scarb.toml`:
 
 ```toml
 [dependencies]
-cartesian_merkle_tree = "0.2.0"
+cartesian_merkle_tree = "0.2.1"
 ```
 
 Or install from GitHub:
