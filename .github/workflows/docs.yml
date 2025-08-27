@@ -25,7 +25,7 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     steps:
     - name: Checkout main branch
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         ref: main
     
@@ -47,7 +47,7 @@ jobs:
         echo "Documentation files prepared"
     
     - name: Checkout gh-pages branch
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         ref: gh-pages
         path: gh-pages
