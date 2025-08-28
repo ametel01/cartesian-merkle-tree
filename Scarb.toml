@@ -4,10 +4,10 @@ version = "0.2.1"
 edition = "2024_07"
 authors = ["Alex Metelli <alex-metelli@gmx.com>"]
 description = "Cairo implementation of Cartesian Merkle Trees - efficient cryptographic data structure combining BST, heap, and Merkle tree properties"
-documentation = "https://ametel01.github.io/cartesian-merkle-tree/"
+documentation = "https://nethermindeth.github.io/cartesian-merkle-tree/"
 readme = "README.md"
-homepage = "https://github.com/ametel01/cartesian-merkle-tree"
-repository = "https://github.com/ametel01/cartesian-merkle-tree"
+homepage = "https://github.com/NethermindEth/cartesian-merkle-tree"
+repository = "https://github.com/NethermindEth/cartesian-merkle-tree"
 license = "MIT"
 keywords = [
     "merkle-tree",
@@ -19,7 +19,7 @@ keywords = [
 
 [package.urls]
 "Research Paper" = "https://arxiv.org/abs/2504.10944"
-"Bug Reports" = "https://github.com/ametel01/cartesian-merkle-tree/issues"
+"Bug Reports" = "https://github.com/NethermindEth/cartesian-merkle-tree/issues"
 
 [dependencies]
 starknet = "2.12.0"
